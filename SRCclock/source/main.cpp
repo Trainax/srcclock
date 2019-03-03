@@ -1,39 +1,3 @@
-/**
- *	@mainpage SRCclock
- *	@author Vittorio Tornielli di Crestvolant <vittorio.tornielli@gmail.com>
- *	@date 2009-2014
- *	@copyright (C) 2014  Vittorio Tornielli di Crestvolant
- *	@version 1.0
- *
- *	@section Description
- *
- *	This program decodes/plays the SRC RAI radio signal created by the INRIM.
- *	The SRC (Segnale orario Rai Codificato) is generated every minute by the
- *	laboratories of the INRIM (Istituto Nazionale di Ricerca Metrologica) and
- *	transmitted to RAI for broadcasting. Any AM/FM radio tuner incorporated or attached
- *	to the computer can be used to receive and to decode the SRC through this
- *	program. Alternatively, it is possible to read the raw audio data from file
- *	or to reproduce the signal for test purposes.
- *
- *
- *   @section License
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -45,7 +9,7 @@ using std::cout;
 using std::cerr;
 
 
-// struct used to gather command line options
+// Struttura utilizzata per raccogliere le opzioni da riga di comando
 struct SRCoption {
 	int SRCaction;
 	bool random_samples, random_theta,  do_sync, binary, iso, sys_sync;
@@ -54,60 +18,57 @@ struct SRCoption {
 	long delay;
 	char *soundDev, *fo, *logfile, *setDate;
 };
-	
+
 
 
 
 void print_help(const char* filename)
 {
-  cout  <<"Usage:\t" <<filename <<" --decode [OPTIONS]\n"
-	<<"or\t" <<filename <<" --play [OPTIONS]\n"
-	<<"\nOption list:\n"
-	<<"  -d, --decode\t\tdecode SRC signal\n"
-	<<"  -y, --system-sync\tSyncronise the system clock to the SRC. Requires\n\t\t\tsuperuser privileges.\n"
-	<<"  -N, --snr=SNR_LEVEL\tSNR detection level over the noise in dB.\n\t\t\tDefault is SNR_LEVEL=5 dB abose noise level\n"
-	<<"  -W, --window=LENGTH\tWindow Decision System. Set the length of the window\n\t\t\tin time symbols. Default is LENGTH=50 symbols\n"
-	<<"  -D, --delay=DELAY\tdelay of syncronisation in microseconds\n"
-	<<"  -T, --timeout=TIMEOUT\tset the timeout for decoding in seconds\n"
-	<<"  -t, --threshold=TH\tset static decision threshold in dB (default -35 dB)\n"
+  cout<<"Utilizzo:\t" <<filename <<" --decode [OPZIONI]\n"
+	<<"oppure\t" <<filename <<" --play [OPZIONI]\n"
+	<<"\nLista delle opzioni disponibili:\n"
+	<<"  -d, --decode\t\tDecodifica il segnale SRC\n"
+	<<"  -y, --system-sync\tSincronizza l'ora di sistema con il segnale SRC. Necessita\n\t\t\t dei privilegi di super user\n"
+	<<"  -N, --snr=SNR_LEVEL\tLivello di rilevamento SNR sul rumore in dB.\n\t\t\tDi default è SNR_LEVEL=5dB sopra il livello di rumore\n"
+	<<"  -W, --window=LENGTH\tWindow Decision System. Imposta la lunghezza della finestra\n\t\t\tin time symbols. Di default è LENGTH=50 simboli\n"
+	<<"  -D, --delay=DELAY\tdelay della sincronizzazione in microsecondi\n"
+	<<"  -T, --timeout=TIMEOUT\tImposta il timeout per la decodifica in secondi\n"
+	<<"  -t, --threshold=TH\tImposta la soglia di decisione statica in dB(default -35 dB)\n"
 	<<'\n'
-	<<"  -p, --play\t\tplay SRC signal\n"
-	<<"  -k, --rand-theta\tgives a random theta while playing\n"
-	<<"  -o, --rand-samples\tadd random samples (< 1 sec) before playing the signal\n"
-	<<"  -a, --power=POWER\tlevel of power of the wave in dB when playing\n"
-	<<"  -n, --noise=SIGMA\tplays the SRC with a given noise expressed as the RMS\n"
-	<<"  -S, --set-date=DATE\tSet the SRC date time in the format <hh:mm DD/MM/YYYY>\n"
-	<<"  -e, --dst-on\t\tforce the dst flag (OE) to be 1\n"
-	<<"  -E, --dst-off\t\tforce the dst flag (OE) to be 0\n"
-	<<"  -C, --change-time=SE\tset SRC warning days of change solar/winter time [0-7]\n\t\t\t(7 = no warning, default)\n"
-	<<"  -l, --leap-second=SI\tset SRC warning of leap second (+1|-1)\n\t\t\tsecond at the end of the month\n"
+	<<"  -p, --play\t\tRiproduci il segnale SRC\n"
+	<<"  -k, --rand-theta\tDa un theta random in riproduzione\n"
+	<<"  -o, --rand-samples\tAggiungi dei campioni random (< 1 sec) prima di riprodurre il segnale\n"
+	<<"  -a, --power=POWER\tLivello di potenza del segnale in dB in riproduzione\n"
+	<<"  -n, --noise=SIGMA\tRiproduce il segnale SRC con un rumore espresso come il RMS\n"
+	<<"  -S, --set-date=DATE\tImposta la data/ora del segnale SRC nel formato <hh:mm DD/MM/YYYY>\n"
+	<<"  -e, --dst-on\t\tForza il flag per l'ora solare (OE) ad essere 1\n"
+	<<"  -E, --dst-off\t\tForza il flag per l'ora solare (OE) ad essere 0\n"
+	<<"  -C, --change-time=SE\tImposta i giorni di avviso SRC per il cambiamento dell'ora legale/solare [0-7]\n\t\t\t(7 = senza avviso, default)\n"
+	<<"  -l, --leap-second=SI\tImposta l'avviso SRC del secondo intercalare (+1|-1)\n\t\t\talla fine del mese\n"
 	<<'\n'
-	<<"  -s, --sync\t\tsyncronisation with RP tones.\n\n"
-	<<"  -r, --rate=FREQ\tset the sample frequency (for input/output on files\n\t\t\tdefault is 8 kHz)\n"
-	<<"  -m, --mono\t\tsound stream is mono (1 channel). Default is stereo\n\t\t\t(2 channels)\n"
-	<<"  -M, --stero\t\tsound stream is stereo (2 channels). This is the\n\t\t\tdefault setting\n"
-	<<"  -f, --file=FILE\tselect source/destination file (default is sound server)\n"
-	<<"  -c, --card=DEV\tspecifies a different sound device\n"
-	<<"  -v, --debug=LEVEL\tverbose level (default 1)\n"
-	<<"  -I, --iso\t\tPrint the date/time in the format ISO 8601\n\t\t\t(default: RFC2822 format)\n"
-	<<"  -b, --binary\t\tPrint the binary representation of the SRC signal\n"
-	<<"  -R, --repeat=TIMES\tNumber of decoding repetition (default = 1.\n\t\t\tSet 0 for unlimited repetitions)\n"
-	<<"  -L, --logfile=LOG\tredirect outputs to file log\n"
-	<<"  -w, --warranty\twarranty details\n"
-	<<"  -V, --version\t\tversion of the program\n"
-	<<"  -h, --help\t\tprint this help then exits.\n\n";
+	<<"  -s, --sync\t\tSincronizzazione con gli impulsi sonori da 1kHz\n\n"
+	<<"  -r, --rate=FREQ\tImposta la frequenza di campionamento (per l'input/output su file\n\t\t\tdi default è 8 kHz)\n"
+	<<"  -m, --mono\t\tImposta l'audio in mono (1 canale). Di default è stereo\n\t\t\t(2 canali)\n"
+	<<"  -M, --stero\t\tImposta l'audio in stereo (2 canali). Questa è\n\t\t\tl'opzione di default\n"
+	<<"  -f, --file=FILE\tSeleziona il file sorgente/destinazione (l'impostazione predefinita è il server audio)\n"
+	<<"  -c, --card=DEV\tSpecifica un diverso dispositivo audio\n"
+	<<"  -v, --debug=LEVEL\tLivello verbose (default = 1)\n"
+	<<"  -I, --iso\t\tStampa la data/ora nel formato ISO 8601\n\t\t\t(predefinito: formato RFC2822)\n"
+	<<"  -b, --binary\t\tStampa la rappresentazione binaria del segnale SRC\n"
+	<<"  -R, --repeat=TIMES\tNumero di ripetizioni di decodifica (predefinito = 1.\n\t\t\tImposta 0 per ripetizioni illimitate)\n"
+	<<"  -L, --logfile=LOG\tReindirizzare le uscite al registro file\n"
+	<<"  -w, --warranty\tDettagli sulla garanzia\n"
+	<<"  -V, --version\t\tVersione del programma\n"
+	<<"  -h, --help\t\tStampa nuovamente questo aiuto e poi esce\n\n";
 }
 
 
 
 void print_warranty()
 {
-  cout <<"srcclock  Copyright (C) 2014  Vittorio Tornielli di Crestvolant\n"
-       <<"                              Email: vittorio.tornielli@gmail.com\n\n"
-       <<"This program comes with ABSOLUTELY NO WARRANTY.\n"
-       <<"This is free software, and you are welcome to redistribute it\n"
-       <<"under certain conditions; the details of the license can be found in the file\n"
-       <<"LICENSE.txt along with this program. If not, see <http://www.gnu.org/licenses/>.\n\n";
+  cout <<"Questo programma viene fornito senza alcuna garanzia\n"
+       <<"Questo è software libero, e sei invitato a modificarlo, eseguirlo e ridistribuirlo\n"
+			 <<"Questo è software è sotto licenza GPL v3\n";
 }
 
 
@@ -116,13 +77,13 @@ int main(int argc, char **argv) {
 
   Csrc SRC;
   SRCoption options;
-  const char* VERSION = "1.0";
+  const char* VERSION = "1.1";
   int error = 0;
   int choice;
-  
+
   bool openState;	// used for error control
-  
-  
+
+
   // default values:
   options.random_samples = false;
   options.random_theta = false;
@@ -142,7 +103,7 @@ int main(int argc, char **argv) {
   options.timeout = 0;		// uses default
   options.wds = 50;
   options.snr_level = 5.0;	// 5 dB SNR default
-  
+
   options.fo = NULL;
   options.soundDev = NULL;	// default sound device
   options.logfile = NULL;
@@ -154,7 +115,7 @@ int main(int argc, char **argv) {
 
 
   if(argc == 1) {
-    cerr <<"EE: At least one option required.\n\n";
+    cerr <<"Errore: è richiesta almeno un'opzione\n\n";
     print_warranty();
     print_help(argv[0]);
     return 1;
@@ -243,21 +204,21 @@ int main(int argc, char **argv) {
 		break;
       case 'C': options.chdate = atoi(optarg);
 		if((options.chdate < 0) || (options.chdate > 7)) {
-		  cerr <<"EE: Change date input error! Parameter must be in the range [0-7]\n";
+		  cerr <<"Errore: errore di inserimento della data di modifica! Il parametro deve essere compreso nell'intervallo [0-7]\n";
 		  options.chdate = 7;	// no changes
 		}
 		options.SRCaction |= 2;
 		break;
       case 'l': options.leap = atoi(optarg);
 		if((options.leap != 0) && (options.leap != -1) && (options.leap != 1)) {
-		  cerr <<"EE: Leap second must be 1 or -1 (no leap second => 0)\n";
+		  cerr <<"Errore: il secondo intercalare deve essere 1 o -1 (nessun secondo intercalare => 0)\n";
 		  options.leap = 0;
 		}
 		options.SRCaction |= 2;
 		break;
       case 'r': options.fc = atoi(optarg);
 		if((options.fc < 8000) || (options.fc > 48000)) {
-		  cerr <<"EE: Sampling frequency must be in between 8000 and 48000 Hz\nDefault: 8000 Hz\n";
+		  cerr <<"Errore: la frequenza di campionamento deve essere compresa tra 8000 e 48000 Hz\nDefault: 8000 Hz\n";
 		  options.fc = 8000;
 		}
 		break;
@@ -276,7 +237,7 @@ int main(int argc, char **argv) {
 		break;
       case 'T': options.timeout = atoi(optarg);
 		if(options.timeout < 2) {
-		  cerr <<"EE: Timeout cannot be less than 2 seconds. Setting default -> 300 seconds\n";
+		  cerr <<"Errore: il timeout non può essere inferiore a 2 secondi. Impostazione predefinita -> 300 secondi\n";
 		  options.timeout = 300;
 		}
 		options.SRCaction |= 1;
@@ -287,21 +248,21 @@ int main(int argc, char **argv) {
 		break;
       case 'w': print_warranty();
 		break;
-      case 'V': cout <<"Version: " <<VERSION <<'\n';
+      case 'V': cout <<"Versione: " <<VERSION <<'\n';
 		break;
       case '?': // unrecognized argument
 		break;
       case 'h': print_help(argv[0]);
 		return 0;
-      default:	cerr <<"EE: Wrong argument!\n";
+      default:	cerr <<"Errore: argomento sbagliato!\n";
 		print_help(argv[0]);
 		return 1;
     }
   }
 
-  
+
   if(options.verb >= 4) {
-    cout <<"Option passed:\n\n"
+    cout <<"Opzione passata:\n\n"
 	 <<"decodeSRC: " <<options.SRCaction <<'\n'
 	 <<"Window Decision System length: " <<options.wds <<'\n'
 	 <<"random_theta: " <<options.random_theta <<'\n'
@@ -327,9 +288,9 @@ int main(int argc, char **argv) {
     if(options.setDate) cout <<"Set date: " <<options.setDate <<'\n';
     cout <<'\n';
   }
-  
+
   SRC.set_verbose(options.verb);
-  
+
   if(options.logfile) SRC.logOnFile(options.logfile);
   else SRC.logOnSTDOUT();
 
@@ -337,7 +298,7 @@ int main(int argc, char **argv) {
   else SRC.no_sync();
 
   if((options.SRCaction != 1) && (options.SRCaction != 2)) {
-    cerr <<"EE: You should specify either option -d or -p\n\n";
+    cerr <<"Errore: è necessario specificare l'opzione -d o -p\n\n";
     print_help(argv[0]);
     return 1;
   }
@@ -347,15 +308,15 @@ int main(int argc, char **argv) {
     if(options.SRCaction == 1) {
       if(options.fo) {
         openState = SRC.open_file_input(options.fo, options.fc, options.channels);
-        if(!openState) { 
-	  cerr <<"EE: Unable to open input stream file " <<options.fo <<'\n';
+        if(!openState) {
+	  cerr <<"Errore: impossibile aprire il file di input del flusso " <<options.fo <<'\n';
 	  return 1;
         }
       }
       else {
         openState = SRC.open_soundStream_input(options.fc, options.channels, options.soundDev);
         if(!openState) {
-	  cerr <<"EE: Unable to open sound input stream. " <<SRC.get_sound_error() <<'\n';
+	  cerr <<"Errore: impossibile aprire il flusso di input audio. " <<SRC.get_sound_error() <<'\n';
 	  return 1;
         }
       }
@@ -375,14 +336,14 @@ int main(int argc, char **argv) {
         tz.tz_minuteswest = 60*(1 + int(SRC.OE()));
 //      tz.tz_dsttime = DST_MET;		// central europe dst time constant. For old systems....
 
-        ttmm = SRC.get_date_tm();	// 1) return the tm structure of the date/time
+        ttmm = SRC.get_date_tm();		// 1) return the tm structure of the date/time
         t.tv_sec  = mktime(&ttmm);	// 2) convert the current time to the number of seconds since the "epoc"
-// 3) set the number of microseonds. These are calculated taking into account the delay since last reading plus an uncertainty value
+																		// 3) set the number of microseonds. These are calculated taking into account the delay since last reading plus an uncertainty value
         t.tv_usec = SRC.getMilliseconds()*1000l + SRC.microsecDelay() + options.delay;
 
         error = settimeofday(&t, &tz);
-        if(error == 0) cout <<"System clock updated!!\n" <<SRC.dateSTD() <<'\n';
-        else cerr <<"EE: Unable to syncronise the system clock.\n";
+        if(error == 0) cout <<"Ora di sistema sincronizzata!\n" <<SRC.dateSTD() <<'\n';
+        else cerr <<"EE: Impossibile sincronizzare l'ora di sistema\n";
 
       }
     }
@@ -391,9 +352,9 @@ int main(int argc, char **argv) {
         SRC.open_file_output(options.fo, options.fc, options.channels);
       else
         SRC.open_soundStream_output(options.fc, options.channels, options.soundDev);
-    
+
       if(SRC.get_OUTstate() == 0) {
-        cerr <<"Error in opening output stream!\n";
+        cerr <<"Errore nell'apertura del flusso di output!\n";
         return 1;
       }
 
@@ -408,29 +369,28 @@ int main(int argc, char **argv) {
 
       if((options.chdate != 7) || (options.leap != 0))
         SRC.setWarnings(options.chdate, options.leap);
-    
+
       SRC.play(options.power, options.random_samples, options.random_theta, options.noise);
       if(options.verb >= 1) {
         cout <<SRC.dateSTR(options.iso) <<'\n';
         if(options.binary) cout <<SRC <<'\n';
       }
     }
-  
+
     if(options.verb >= 0) {
       if(options.SRCaction == 1) {
         if(SRC.OK()) {
 	  cout <<SRC.dateSTR(options.iso) <<'\n';
 	  if(SRC.warnings() && (options.verb >= 1)) {
-	    cout <<"---------------\nSRC WARNINGS:\n";
-	    if(SRC.SE() != 7) cout <<"Change time in " <<SRC.SE() <<" days\n";
-	    if(SRC.SI()) cout <<"Leap second at the end of the month: " <<SRC.SI() <<" second\n";
+	    cout <<"---------------\nAVVISI SRC:\n";
+	    if(SRC.SE() != 7) cout <<"Cambio dell'ora tra " <<SRC.SE() <<" giorni\n";
+	    if(SRC.SI()) cout <<"Secondo intercalare alla fine del mese: " <<SRC.SI() <<" secondi\n";
 	    cout <<"---------------\n";
 	  }
           if(options.binary) cout <<SRC <<'\n';
         }
         else {
-  	  cerr <<"Decoding error!\n";
-//	  error = 1;
+  	  cerr <<"Errore di decodifica\n";
         }
       }
     }

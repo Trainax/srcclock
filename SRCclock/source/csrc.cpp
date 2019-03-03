@@ -1,22 +1,3 @@
-/*
-    Class Csrc - Implementation.
-    Copyright (C) 2014  Vittorio Tornielli di Crestvolant <vittorio.tornielli@gmail.com>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
 #include "csrc.h"
 
 Csrc::Csrc()
@@ -24,12 +5,12 @@ Csrc::Csrc()
 {
   /* initialize random seed: */
   srand ( time(NULL) );
-  
+
   sample_frequency = 8000;	// default value for sample frequency
   soundChannels = 1;
-  
+
   verbose_level = 1;		// level of debug messages
-  
+
   change_time = 7;		// no changes
   leap_second = 0;
   decoded = false;
@@ -65,7 +46,7 @@ bool Csrc::operator==(const Csrc& other) const
 bool Csrc::operator<(const Csrc& other) const
 {
   bool s;
-  
+
   if(year == other.year)
     if(month == other.month)
       if(day == other.day)
@@ -79,7 +60,7 @@ bool Csrc::operator<(const Csrc& other) const
       else s = day < other.day;
     else s = month < other.month;
   else s = year < other.year;
-  
+
   return s;
 }
 
@@ -125,7 +106,7 @@ bool Csrc::open_soundStream_input(int fc, int channels, const char* device, pa_s
     sample_frequency = fc;
     soundChannels = channels;
   }
-  
+
   return streamON;
 }
 
@@ -136,7 +117,7 @@ bool Csrc::open_soundStream_output(int fc, int channels, const char* device, pa_
     sample_frequency = fc;
     soundChannels = channels;
   }
-  
+
   return streamON;
 }
 
@@ -146,7 +127,7 @@ bool Csrc::open_file_input(const char* fileNAme)
   sample_frequency = 8000;
   soundChannels = 1;
   streamON = Crw::open_file_input(fileNAme);
-  
+
   return streamON;
 }
 
@@ -156,12 +137,12 @@ bool Csrc::open_file_output(const char* fileNAme)
   sample_frequency = 8000;
   soundChannels = 1;
   streamON = Crw::open_file_output(fileNAme);
-  
+
   return streamON;
 }
 
 bool Csrc::open_file_input(const char* fileNAme, int fc, int channels)
-{ 
+{
   streamON = Crw::open_file_input(fileNAme);
   if(streamON) {
     sample_frequency = fc;
@@ -203,7 +184,7 @@ int Csrc::readBuffer(float* buffer, int samples)
     for(i = r; i < 2*r; i++)	// put the unused samples to zero to prevent errors
       buffer[i] = 0.0;
   }
-  
+
   return r;		// returns the number of samples read
 }
 
@@ -236,17 +217,7 @@ void Csrc::set_today()
   struct tm ttmm;
   time_t tt = time(NULL);
   localtime_r(&tt, &ttmm);
-//               struct tm {
-//                   int tm_sec;         /* seconds */
-//                   int tm_min;         /* minutes */
-//                   int tm_hour;        /* hours */
-//                   int tm_mday;        /* day of the month */
-//                   int tm_mon;         /* month */
-//                   int tm_year;        /* year */
-//                   int tm_wday;        /* day of the week */
-//                   int tm_yday;        /* day in the year */
-//                   int tm_isdst;       /* daylight saving time */
-//               };
+
   min = ttmm.tm_min;
   hour = ttmm.tm_hour;
   day = ttmm.tm_mday;
@@ -255,15 +226,15 @@ void Csrc::set_today()
   month = ttmm.tm_mon + 1;
   year = ttmm.tm_year + 1900;
   sec = 53;
-  
+
   if(ttmm.tm_isdst) dst = true;
   else dst = false;
 
   change_time = 7;
   leap_second = 0;
-  
+
   encode();
-  
+
   decoded = false;
   msec = 0;
 }
@@ -281,7 +252,7 @@ tm Csrc::get_date_tm() const
   ttmm.tm_mon  = month - 1;
   ttmm.tm_year = year - 1900;
   ttmm.tm_isdst = int(dst);
-  
+
   return ttmm;
 }
 
@@ -315,7 +286,7 @@ double Csrc::randn(double mu, double sigma)
   // return second deviate
   return var2*polar*sigma + mu;
   }
-  
+
   // If a deviate is available from a previous call to this function, it is
   // returned, and the flag is set to false.
   else {
@@ -333,7 +304,7 @@ bool Csrc::P1() const
 
 bool Csrc::P2() const
 {
-  return src_vector[31] == parity(17, 30); 
+  return src_vector[31] == parity(17, 30);
 }
 
 bool Csrc::PA() const
@@ -412,7 +383,7 @@ void Csrc::bin_convert(int val, int offset, int length)
       case 8: k = val / 80;
               val -= 80*k;
               break;
-      default: if(verbose_level >= 2) lerr <<"EE: bin_convert(): Length error!\n";
+      default: if(verbose_level >= 2) lerr <<"Errore: bin_convert(): errore di lunghezza!\n";
                return;
     }
     src_vector[offset + i] = k;
@@ -436,9 +407,9 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
   float amplitude;		// amplitude of the sinusoidal wave
   int samples, k;
   int freq;
-  
+
   encode();
-  
+
   if(verbose_level >= 3) {
     lout <<"Play(): src_vector = ";
     for(int i = 0; i < 48; i++) lout <<src_vector[i];
@@ -450,7 +421,7 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
 //////////////////////////////////////////////////////////////////////
 
   running = true;
-  
+
   if(random_theta) {	// set a random theta!
     int v = rand() % 360;
     theta = v/180.0*M_PI;
@@ -461,22 +432,22 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
   if(initial_delay) {
     int c;
     c = rand() % sample_frequency;  // delay < 1 second
-    if(verbose_level >= 1) lout <<"Initial delay: " <<c <<" samples. (" <<float(c/float(sample_frequency)) 
-				<<" secs)\n";
-    
+    if(verbose_level >= 1) lout <<"Delay iniziale: " <<c <<" campioni. (" <<float(c/float(sample_frequency))
+				<<" secondi)\n";
+
     for(int i = 0; i < c; i++) {
       tone_buffer[i*soundChannels] = randn(0, noise_sigma);
       checkSample(tone_buffer[i*soundChannels]);
       stereo_encode(tone_buffer, i*soundChannels);
       if(verbose_level >= 5)
-	lout <<"Random value: " <<tone_buffer[i*soundChannels] <<'\n';
+	lout <<"Valore casuale: " <<tone_buffer[i*soundChannels] <<'\n';
     }
     Csrc::writeBuffer(tone_buffer, c);
   }
-  
+
   if(power > 0) power *= -1;
   amplitude = pow(10, (power/20.0));
-   
+
   for(int i = 0; i < 48; i++) {
     if(i == 32) {
       samples = 0.04*sample_frequency;
@@ -491,7 +462,7 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
 
     if(src_vector[i] == 0) freq = F0;		// chooses the right frequency
     else freq = F1;
-      
+
     for(k = 0; k < N; k++) {
       tone_buffer[k*soundChannels] = amplitude*cos(2.0*M_PI*freq/sample_frequency*k + theta) + randn(0, noise_sigma);
       checkSample(tone_buffer[k*soundChannels]);
@@ -500,7 +471,7 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
     Csrc::writeBuffer(tone_buffer, N);
 
   }	// end of bit transmission
-  
+
 
 // plays the SYNC beeps
 
@@ -514,9 +485,9 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
       stereo_encode(tone_buffer, k*soundChannels);
     }
     Csrc::writeBuffer(tone_buffer, samples);
-    
 
-    
+
+
     for(int i = 0; i < 5; i++) {				// plays 5 ticks (syncronization)
       samples = 0.1*sample_frequency;
       for(k = 0; k < samples; k++) {
@@ -524,8 +495,8 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
         checkSample(tone_buffer[k*soundChannels]);
         stereo_encode(tone_buffer, k*soundChannels);
       }
-    
-    
+
+
       while (k < sample_frequency) {
         tone_buffer[k*soundChannels] = randn(0, noise_sigma);
         checkSample(tone_buffer[k*soundChannels]);
@@ -537,22 +508,22 @@ void Csrc::play(double power, bool initial_delay, bool random_theta, double nois
 
 
     if(ticks >= 6) {
-    
+
       for(k = 0; k < sample_frequency; k++) {		// 1 second of silence before the last tick
         tone_buffer[k*soundChannels] = randn(0, noise_sigma);
         checkSample(tone_buffer[k*soundChannels]);
         stereo_encode(tone_buffer, k*soundChannels);
       }
-    
+
       Csrc::writeBuffer(tone_buffer, sample_frequency);
-    
+
       samples = 0.1*sample_frequency;
       for(k = 0; k < samples; k++) {			// this is the last tick!
         tone_buffer[k*soundChannels] = amplitude*cos(2.0*M_PI*Fsync/sample_frequency*k + theta) + randn(0, noise_sigma);
         checkSample(tone_buffer[k*soundChannels]);
         stereo_encode(tone_buffer, k*soundChannels);
       }
-    
+
       Csrc::writeBuffer(tone_buffer, samples);
 
       if(ticks == 7) {
@@ -606,13 +577,13 @@ void Csrc::encode()
   bin_convert(min, 8, 7);
   if(dst) src_vector[15] = 1;
   else src_vector[15] = 0;
-  
+
   src_vector[16] = parity(0, 15);	// P1
   bin_convert(month, 17, 5);
   bin_convert(day, 22, 6);
   bin_convert(wday, 28, 3);
   src_vector[31] = parity(17, 30);	// P2
-  
+
   // set second block
   src_vector[32] = 1;		// ID2
   src_vector[33] = 0;
@@ -624,22 +595,22 @@ void Csrc::encode()
   }
   else {
     bin_convert(change_time, 42, 3);
-    if(verbose_level >= 5) lout <<"encode() Warning of change time: " <<change_time <<'\n';
+    if(verbose_level >= 5) lout <<"encode() Avviso del cambio dell'ora " <<change_time <<'\n';
   }
   switch(leap_second) {	// set the warning for leap second
     case +1: src_vector[45] = 1;
              src_vector[46] = 0;
-             if(verbose_level >= 5) lout <<"encode() Leap second at the end of the month: +1s\n";
+             if(verbose_level >= 5) lout <<"encode() Secondo intercalare alla fine del mese: +1s\n";
              break;
     case -1: src_vector[45] = 1;
              src_vector[46] = 1;
-             if(verbose_level >= 5) lout <<"encode() Leap second at the end of the month: -1s\n";
+             if(verbose_level >= 5) lout <<"encode() Secondo intercalare alla fine del mese: -1s\n";
              break;
     case 0:
     default: src_vector[45] = 0;
 	     src_vector[46] = 0;
   }
-  
+
   src_vector[47] = parity(32, 46);	// PA
 }
 
@@ -704,15 +675,15 @@ bool Csrc::decode()
 
 
   decoded = false;
-  
-  if(verbose_level >= 2) lout <<"Threshold: " <<get_decision_threshold() <<" dB\n";
-  
+
+  if(verbose_level >= 2) lout <<"Soglia: " <<get_decision_threshold() <<" dB\n";
+
   reset_buffer(buffer, (2*N + DELTA)*soundChannels);
   c = 0;		// number of bits decoded
   bytes2read = N;
   extra = 0;
   error = -1;
-  
+
   power0 = power1 = 0.0;
 
 // The cycle that acquires the SRC data starts here
@@ -725,7 +696,7 @@ bool Csrc::decode()
       running = false;
       decoded = false;
       error = -3;
-      if(verbose_level >= 1) lerr <<"EE: Reading error!!\n";
+      if(verbose_level >= 1) lerr <<"Errore: errore di lettura!\n";
       break;
     }
 
@@ -744,8 +715,8 @@ bool Csrc::decode()
         if(decision_threshold > 1)
           decision_threshold = max(avg, 1.0/snr_level);
         if(verbose_level >= 4)
-          lout <<"Threshold now is " <<get_decision_threshold() <<" dB. Noise average of the last " <<window_length
-               <<" time symbols is " <<10*log10(avg) <<" dB; Pass: " <<total <<'\n';
+          lout <<"La soglia ora è " <<get_decision_threshold() <<" dB. Il livello medio del rumore di " <<window_length
+               <<" time symbols è " <<10*log10(avg) <<" dB; Pass: " <<total <<'\n';
       }
     }	//------------------------------------------------------------ End of Window Calibration System
 
@@ -762,9 +733,9 @@ bool Csrc::decode()
 	lout <<"Supposed detection at pass " <<total <<". Power level: " <<10*log10(max(power0, power1)) <<" dB for frequency ";
 	if(power0 > power1) lout <<"F0\n";
 	else lout <<"F1\n";
-        lout <<"Decision Threshold: " <<get_decision_threshold() <<" dB\n";
+        lout <<"Soglia di decisione: " <<get_decision_threshold() <<" dB\n";
       }
-      
+
       if(power0 > power1) {  // 0
 	if(c == 0) {  // syncronization of first block
 	  bytes2read = tuning(F0, buffer, extra, N, DELTA, STEP, power0);
@@ -786,18 +757,18 @@ bool Csrc::decode()
     }
     else if(c != 0)
            src_vector[c++] = -1;		// if the symbol is under threshold during the transmission forces a reset.
-    
-    
+
+
     if(!check(c)) {
-      if(verbose_level >= 2) lout <<"EE: Detection error. RESET\nPass " <<total <<"; Error code: " <<error <<"\n-----\n";
+      if(verbose_level >= 2) lout <<"EE: Errore di rilevamento. RESET\nPass " <<total <<"; Codice di errore: " <<error <<"\n-----\n";
 
       c = 0;
       avg = 0.0;
       reset_buffer(buffer, (2*N + DELTA)*soundChannels);
       reset_src_vector();
     }
-    
-    
+
+
 
     if(c == 32) {
     /* At this point the first block has been decoded.
@@ -821,12 +792,12 @@ bool Csrc::decode()
         hour = deconvert(2, 6);
         min = deconvert(8, 7);
         dst = bool(src_vector[15]);
-      
+
         month = deconvert(17, 5);
         day = deconvert(22, 6);
         wday = deconvert(28, 3);
         year = deconvert(34, 8) + 2000;
-      
+
         change_time = deconvert(42, 3);
         lp = deconvert(45, 2);
         switch(lp) {
@@ -843,9 +814,9 @@ bool Csrc::decode()
 
 	decoded = (c == 48) && ID1() && P1() && P2() && ID2() && PA() && (error == 0) && valid_date();	// decoded!!
       }
-      
+
       if(!decoded) {
-        if(verbose_level >= 2) lout <<"EE: decoding error after 48 symbols. Error code: " <<error <<"; Valid date: "
+        if(verbose_level >= 2) lout <<"Errore: errore di decodifica dopo 48 symbols. Codice di errore: " <<error <<"; Data valida: "
 					<<valid_date() <<"\nResetting...\n";
         c = 0;
         avg = 0.0;
@@ -870,7 +841,7 @@ bool Csrc::decode()
     return decoded;
   }
 
-  
+
 //--------------------------------------------------------------------------------
 // Syncronization
 //--------------------------------------------------------------------------------
@@ -883,11 +854,11 @@ bool Csrc::decode()
     int ticks;
     int noise_symbols;
     long int syncTimeout, syncTimeout_sec;
-    
-    if(verbose_level >= 1) lout <<"---- SRC received! Synchronization! ----\n";
-    
+
+    if(verbose_level >= 1) lout <<"---- Segnale SRC ricevuto! Sincronizzazione! ----\n";
+
     reset_buffer(syncBuffer, (2*Nsync + DELTAsync)*soundChannels);
-    
+
     c = 0;			// ticks decoded
     bytes2read = Nsync;
     extra = 0;
@@ -902,7 +873,7 @@ bool Csrc::decode()
 					// the end of segment S2 and the first RP is considered.
 
     if(ticks != 6) {
-      if(verbose_level >= 1) lout <<"This minute has " <<(60+leap_second) <<" seconds! The sync ticks are " <<ticks <<'\n';
+      if(verbose_level >= 1) lout <<"Questo minuto ha " <<(60+leap_second) <<" secondi! Gli impulsi di sincronizzazione sono " <<ticks <<'\n';
       leap_second = 0;
     }
 
@@ -947,32 +918,32 @@ bool Csrc::decode()
       else if(verbose_level >= 4) lout <<"Sync under threshold: " <<10*log10(power) <<" dB\n";
       syncTimeout++;
     }
-    
+
     if(c == ticks) {
       long long nanosec;
       add_minute();
       error = 0;
-      if(verbose_level >= 1) lout <<" =====> [Synchronized!]\n";
+      if(verbose_level >= 1) lout <<" =====> [Sincronizzato!]\n";
       msec = 100;
       std::chrono::duration<double,std::ratio<1,1000000000>> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - sys_clock);
       nanosec = time_span.count();	// syncronisation offset in nanoseconds since the reading of last RP
 
-      if(verbose_level >= 2) lout <<"Syncronisation offset in ns: " <<nanosec <<" ns\n";
+      if(verbose_level >= 2) lout <<"Offset della sincronizzazione in nanosecondi: " <<nanosec <<" ns\n";
     }
     else {
       sec = 53;			// if the system is not able to syncronize, it chooses the end of the encoded block
-      if(verbose_level >= 1) lerr <<"\nEE: Sync timeout expired. Timeout: " <<((syncTimeout*Nsync)/sample_frequency) << " seconds.\n"
-				  <<"\tTicks received: " <<c <<" out of " <<ticks <<'\n';
+      if(verbose_level >= 1) lerr <<"\nErrore: Il timeout per la sincronizzazione è scaduto. Timeout: " <<((syncTimeout*Nsync)/sample_frequency) << " secondi.\n"
+				  <<"\tImpulsi ricevuti: " <<c <<" su " <<ticks <<'\n';
       error = 7;
     }
-    
+
     delete[] syncBuffer;
   }
 //--------------------------------------------------------------------------------
 // END Syncronization
 //--------------------------------------------------------------------------------
   running = false;	// finished! stop running!
-  
+
   return decoded;
 }			// end of decode() function!
 
@@ -990,7 +961,7 @@ long Csrc::microsecDelay() const
 
 /** The leapsecond is applied at the enld of the month UTC time. This means that it applies at time 00:59 +0100
   *  or 01:59 +0200 of the 1st of the new month for the Italian time.
-  * 
+  *
   */
 int Csrc::number_of_RP() const
 {
@@ -1029,7 +1000,7 @@ bool Csrc::valid_date() const
 {
   bool isvalid;
 
-  
+
   isvalid = ((sec >= 0) && (sec <= 60) && (min >= 0) && (min < 60) && (hour >= 0) && (hour < 24));
 
   if(isvalid) {
@@ -1050,7 +1021,7 @@ bool Csrc::valid_date() const
 		break;
       default:	isvalid = false;
     }
-    
+
     if(isvalid == true) {
       isvalid = ((day > 0) && (day <= numberOfDays));
 
@@ -1065,7 +1036,7 @@ bool Csrc::valid_date() const
       }
     }
   }
-  
+
   return isvalid;
 }
 
@@ -1244,7 +1215,7 @@ bool Csrc::check(int bits)
     case 1:  if(src_vector[0] != 0) error = 1;
 	     break;
   }
-  
+
   if(bits > 16) {
     if(!P1())
       error = 2;
@@ -1276,7 +1247,7 @@ void Csrc::add_minute()
       hour = 0;
       if(wday != 7) wday++;
       else wday = 1;
-      
+
       int numberOfDays;		// number of days in a month
       switch(month) {
 	case 1: case 5:
@@ -1322,7 +1293,7 @@ std::ostream& operator<<(std::ostream& os, const Csrc& src)
     os <<src.src_vector[i];
     if(i == 31) os <<' ';
   }
-  
+
   return os;
 }
 
@@ -1330,10 +1301,10 @@ std::ostream& operator<<(std::ostream& os, const Csrc& src)
 std::istream& operator>>(std::istream& is, Csrc& src)
 {
   char c;
-  
+
   for(int i = 0; i < 48; i++) {
     is >> c;
-    
+
     switch(c) {
       case '0': src.src_vector[i] = 0;
 		break;
@@ -1341,23 +1312,23 @@ std::istream& operator>>(std::istream& is, Csrc& src)
 		break;
       default:  src.src_vector[1] = 0;		// error
     }
-    
+
     if(!src.check(i+1))
       break;
   }
-  
+
     src.check(48);		// checks the entire binary sequence
     if(src.error == 0) {
       int lp;
       src.hour = src.deconvert(2, 6);
       src.min = src.deconvert(8, 7);
       src.dst = bool(src.src_vector[15]);
-      
+
       src.month = src.deconvert(17, 5);
       src.day = src.deconvert(22, 6);
       src.wday = src.deconvert(28, 3);
       src.year = src.deconvert(34, 8) + 2000;
-      
+
       src.change_time = src.deconvert(42, 3);
       lp = src.deconvert(45, 2);
       switch(lp) {
@@ -1376,23 +1347,23 @@ std::istream& operator>>(std::istream& is, Csrc& src)
 	src.set_today();
     }
     else src.set_today();
-    
-    
+
+
     src.decoded = false;
-  
+
   return is;
 }
 
 
 string Csrc::dateSTD() const
 {
-  const char* wday_str[]  = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-  const char* month_str[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Set", "Oct", "Nov", "Dec"};
+  const char* wday_str[]  = {"Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"};
+  const char* month_str[] = {"Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"};
   string str;
 
   str = wday_str[wday-1];
   str += ", " + itos(day, 2) + " " + month_str[month-1] + " " + itos(year, 4) + " ";
-  str += itos(hour, 2) + ":" + itos(min, 2) + ":" + itos(sec, 2) + " " + "+" + itos(1 + int(dst), 2) + "00"; 
+  str += itos(hour, 2) + ":" + itos(min, 2) + ":" + itos(sec, 2) + " " + "+" + itos(1 + int(dst), 2) + "00";
 
   return str;
 }
@@ -1401,10 +1372,10 @@ string Csrc::dateSTD() const
 string Csrc::dateISO() const
 {
   string str;
-  
+
   str = itos(year, 4) + "-" + itos(month, 2) + "-"  + itos(day, 2);
   str += "T" + itos(hour, 2) + ":" + itos(min, 2) + ":"  + itos(sec, 2) + "+" + itos(1 + int(dst), 2) + "00";
-  
+
   return str;
 }
 
@@ -1438,7 +1409,7 @@ bool Csrc::set(int MI, int OR, int GM, int GS, int ME, int AN, bool OE, int SE, 
 {
   bool correct_date;
   decoded = false;
-  
+
   sec = 53;
   min = MI;
   hour = OR;
@@ -1449,15 +1420,15 @@ bool Csrc::set(int MI, int OR, int GM, int GS, int ME, int AN, bool OE, int SE, 
   dst = OE;
   change_time = SE;
   leap_second = SI;
-  
+
   if((!valid_date()) || (change_time < 0) || (change_time > 7) || (leap_second < -1) || (leap_second > 1)) {
     set_today();
     correct_date = false;
   }
   else correct_date = true;
-  
+
   encode();
-  
+
   if(verbose_level >= 2)
     lout <<"SRC set to:\nSeconds: " <<sec <<"\nMinutes: " <<min <<"\nHours: " <<hour
 	 <<"\nDay: " <<day <<"\nMonth: " <<month <<"\nYear: " <<year
@@ -1504,11 +1475,11 @@ bool Csrc::setWarnings(int SE, int SI)
     correct = true;
   }
   else correct = false;
-  
+
   if(verbose_level >= 2)
-    lout <<"SRC set to:\nSeconds: " <<sec <<"\nMinutes: " <<min <<"\nHours: " <<hour
-	 <<"\nDay: " <<day <<"\nMonth: " <<month <<"\nYear: " <<year
-	 <<"\nDST: " <<dst <<";\tChange time: " <<change_time <<";\tLeap second: " <<leap_second <<'\n';
+    lout <<"SRC impostato a:\nSecondi: " <<sec <<"\nMinuti: " <<min <<"\nOre: " <<hour
+	 <<"\nGiorno: " <<day <<"\nMese: " <<month <<"\nAnno: " <<year
+	 <<"\nDST: " <<dst <<";\tCambio dell'ora: " <<change_time <<";\tSecondo intercalare: " <<leap_second <<'\n';
 
   return correct;
 }
@@ -1526,10 +1497,10 @@ bool Csrc::setOE(bool newDST)
 int* Csrc::get_src_vector_int() const
 {
   int* v = new int[48];
-  
+
   for(int i = 0; i < 48; i++)
     v[i] = src_vector[i];
-  
+
   return v;
 }
 
@@ -1553,5 +1524,3 @@ void Csrc::close_output_stream()
   streamON = false;
   Crw::close_output_stream();
 }
-
-
