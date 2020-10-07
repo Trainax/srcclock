@@ -2,7 +2,7 @@
 
 ## Italiano
 
-Questo programma decodifica/riproduce il segnale radiio RAI SRC.
+Questo programma decodifica/riproduce il segnale radio RAI SRC.
 Il segnale SRC (Segnale Rai Codificato) è generato negli studi di Via Asiago a Roma dalla RAI.
 Qualsiasi sintonizzatore AM o FM incorporato oppure attaccato al computer può essere utilizzato per ricevere e decodificare il segnale SRC con questo programma.
 Alternativamente, è possibile leggere l'audio RAW da un file o riprodurre il segnale per motivi di test.
