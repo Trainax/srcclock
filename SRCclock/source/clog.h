@@ -6,35 +6,37 @@
 #include <string>
 
 class Clog {
-    std::ofstream fout;
-    int mode;
-    bool errorStream;
+std::ofstream fout;
+int mode;
+bool errorStream;
 
 public:
-    Clog();
-    Clog(bool ErrorMode);
-    Clog(const char* filename, bool ErrorMode = false);
+Clog();
+Clog(bool ErrorMode);
+Clog(const char* filename, bool ErrorMode = false);
 
 
-    void setErrorStream(bool ErrorMode) { errorStream = ErrorMode; }
+void setErrorStream(bool ErrorMode) {
+        errorStream = ErrorMode;
+}
 
-    bool streamOnFile(const char* filename);
-    void streamOnSTDOUT();
-    void closeFile();
+bool streamOnFile(const char* filename);
+void streamOnSTDOUT();
+void closeFile();
 
-    bool good() const;
+bool good() const;
 
-    Clog& flush();
+Clog& flush();
 
-    Clog& operator<<(const std::string& s);
-    Clog& operator<<(const char* s);
-    Clog& operator<<(char s);
-    Clog& operator<<(int s);
-    Clog& operator<<(double s);
-    Clog& operator<<(long int s);
-    Clog& operator<<(long long int s);
+Clog& operator<<(const std::string& s);
+Clog& operator<<(const char* s);
+Clog& operator<<(char s);
+Clog& operator<<(int s);
+Clog& operator<<(double s);
+Clog& operator<<(long int s);
+Clog& operator<<(long long int s);
 
-    virtual ~Clog();
+virtual ~Clog();
 };
 
 #endif // CLOG_H
